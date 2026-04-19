@@ -458,7 +458,7 @@
 <section class="hero">
   <p class="hero-label">// Available for work</p>
   <h1 class="hero-title">
-    Your Name<br>
+    DrKraniax<br>
     <span class="line2">Designer &amp;</span><br>
     <span class="accent">Developer.</span>
   </h1>
@@ -496,7 +496,7 @@
   <div class="about-grid">
     <div class="about-text reveal">
       <h2 class="section-title">A bit<br>about me.</h2>
-      <p>Hi — I'm <strong>Your Name</strong>, a full-stack developer and designer based in <strong>Your City</strong>. I've been building for the web for over 5 years, working across startups, agencies, and solo projects.</p>
+      <p>Hi — I'm <strong>DrKraniax</strong>, a full-stack developer and designer based in <strong>Your City</strong>. I've been building for the web for over 5 years, working across startups, agencies, and solo projects.</p>
       <p>I believe great software sits at the intersection of <strong>engineering rigor</strong> and <strong>design craft</strong>. I'm obsessive about the details — performance, accessibility, and the feeling a product gives you when everything just works.</p>
       <p>When I'm not at the keyboard, you'll find me hiking, reading, or obsessing over coffee.</p>
     </div>
@@ -595,7 +595,7 @@
 </section>
 
 <footer>
-  <span>© 2026 Your Name. All rights reserved.</span>
+  <span>© 2026 DrKraniax. All rights reserved.</span>
   <span>Designed &amp; built by you.</span>
 </footer>
 
