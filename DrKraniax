@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Portfolio — Your Name</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080b0f;
+    --surface: #0f1318;
+    --card: #131920;
+    --border: #1e2730;
+    --accent: #00e5ff;
+    --accent2: #7f5af0;
+    --text: #e8edf2;
+    --muted: #637080;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* Glowing orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.15;
+  }
+  .orb-1 { width: 600px; height: 600px; background: var(--accent2); top: -200px; left: -200px; }
+  .orb-2 { width: 500px; height: 500px; background: var(--accent); bottom: -100px; right: -100px; }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.4rem 4rem;
+    background: rgba(8,11,15,0.7);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--accent); }
+
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 4rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: var(--font-head);
+    font-size: clamp(3.5rem, 9vw, 8rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-title .line2 { color: var(--muted); }
+  .hero-title .accent { color: var(--accent); }
+
+  .hero-sub {
+    margin-top: 2rem;
+    max-width: 480px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-cta {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .btn {
+    padding: 0.8rem 2rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+  }
+  .btn-primary:hover { background: #fff; box-shadow: 0 0 30px rgba(0,229,255,0.3); }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* SCROLLING TICKER */
+  .ticker-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0;
+    margin-bottom: 6rem;
+    position: relative;
+    z-index: 1;
+  }
+  .ticker {
+    display: flex;
+    white-space: nowrap;
+    animation: ticker 20s linear infinite;
+    gap: 0;
+  }
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0 2rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .ticker-dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* SECTIONS */
+  section {
+    padding: 5rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: var(--font-head);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 3rem;
+    line-height: 1.1;
+  }
+
+  /* ABOUT */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .about-text p { color: var(--muted); line-height: 1.9; margin-bottom: 1.2rem; }
+  .about-text p strong { color: var(--text); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  .stat-number {
+    font-family: var(--font-head);
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .stat-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; }
+
+  /* WORK */
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,229,255,0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .project-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .project-card:hover::before { opacity: 1; }
+
+  .project-tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 1rem;
+  }
+
+  .project-title {
+    font-family: var(--font-head);
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+  }
+
+  .project-desc { color: var(--muted); font-size: 0.85rem; line-height: 1.7; margin-bottom: 1.5rem; }
+
+  .project-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+
+  .project-arrow {
+    position: absolute;
+    top: 1.5rem; right: 1.5rem;
+    font-size: 1.2rem;
+    color: var(--muted);
+    transition: color 0.2s, transform 0.2s;
+  }
+  .project-card:hover .project-arrow { color: var(--accent); transform: translate(3px, -3px); }
+
+  /* SKILLS */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .skill-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.85rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .skill-item:hover { border-color: var(--accent2); background: #151d26; }
+
+  .skill-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  /* CONTACT */
+  .contact-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .contact-wrapper .section-label,
+  .contact-wrapper .section-title { text-align: center; }
+
+  .contact-email {
+    display: inline-block;
+    font-family: var(--font-head);
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s;
+    margin: 1rem 0 2.5rem;
+  }
+  .contact-email:hover { border-color: var(--accent); }
+
+  .social-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .social-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s;
+  }
+  .social-link:hover { color: var(--accent); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0 4rem;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 1.2rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero, section { padding: 5rem 1.5rem 3rem; }
+    .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.5rem; }
+    .divider { margin: 0 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">YN<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-label">// Available for work</p>
+  <h1 class="hero-title">
+    Your Name<br>
+    <span class="line2">Designer &amp;</span><br>
+    <span class="accent">Developer.</span>
+  </h1>
+  <p class="hero-sub">I craft thoughtful digital experiences — combining clean code with intentional design to build products people love.</p>
+  <div class="hero-cta">
+    <a href="#work" class="btn btn-primary">View my work</a>
+    <a href="#contact" class="btn btn-outline">Get in touch</a>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <!-- duplicated for infinite loop -->
+    <span class="ticker-item"><span class="ticker-dot"></span> Web Design</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Frontend Dev</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> UI / UX</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> React</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> TypeScript</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Node.js</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Open to Collab</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Web Design</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Frontend Dev</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> UI / UX</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> React</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> TypeScript</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Node.js</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Open to Collab</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <p class="section-label reveal">// 01 — About</p>
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <h2 class="section-title">A bit<br>about me.</h2>
+      <p>Hi — I'm <strong>Your Name</strong>, a full-stack developer and designer based in <strong>Your City</strong>. I've been building for the web for over 5 years, working across startups, agencies, and solo projects.</p>
+      <p>I believe great software sits at the intersection of <strong>engineering rigor</strong> and <strong>design craft</strong>. I'm obsessive about the details — performance, accessibility, and the feeling a product gives you when everything just works.</p>
+      <p>When I'm not at the keyboard, you'll find me hiking, reading, or obsessing over coffee.</p>
+    </div>
+    <div class="stats-grid reveal">
+      <div class="stat-card"><div class="stat-number">5+</div><div class="stat-label">Years Experience</div></div>
+      <div class="stat-card"><div class="stat-number">40+</div><div class="stat-label">Projects Shipped</div></div>
+      <div class="stat-card"><div class="stat-number">12</div><div class="stat-label">Happy Clients</div></div>
+      <div class="stat-card"><div class="stat-number">3</div><div class="stat-label">Awards Won</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- WORK -->
+<section id="work">
+  <p class="section-label reveal">// 02 — Selected Work</p>
+  <h2 class="section-title reveal">Things I've<br>built.</h2>
+  <div class="work-grid">
+    <div class="project-card reveal">
+      <div class="project-arrow">↗</div>
+      <p class="project-tag">SaaS · 2024</p>
+      <h3 class="project-title">Dashboard Platform</h3>
+      <p class="project-desc">A real-time analytics dashboard for e-commerce brands, processing millions of events per day with sub-second query performance.</p>
+      <div class="project-stack">
+        <span class="tag">React</span><span class="tag">TypeScript</span><span class="tag">Postgres</span>
+      </div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-arrow">↗</div>
+      <p class="project-tag">Mobile · 2024</p>
+      <h3 class="project-title">Habit Tracker App</h3>
+      <p class="project-desc">A minimalist habit tracking app with streaks, insights, and daily check-ins. 10k+ downloads in the first month.</p>
+      <div class="project-stack">
+        <span class="tag">React Native</span><span class="tag">Expo</span><span class="tag">Supabase</span>
+      </div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-arrow">↗</div>
+      <p class="project-tag">Web · 2023</p>
+      <h3 class="project-title">Agency Website</h3>
+      <p class="project-desc">A high-performance marketing site for a creative agency, featuring WebGL animations and a perfect Lighthouse score.</p>
+      <div class="project-stack">
+        <span class="tag">Next.js</span><span class="tag">Three.js</span><span class="tag">GSAP</span>
+      </div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-arrow">↗</div>
+      <p class="project-tag">Tool · 2023</p>
+      <h3 class="project-title">Dev CLI Toolkit</h3>
+      <p class="project-desc">An open-source command-line tool for scaffolding full-stack projects. 2k+ GitHub stars and growing.</p>
+      <div class="project-stack">
+        <span class="tag">Node.js</span><span class="tag">CLI</span><span class="tag">Open Source</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SKILLS -->
+<section id="skills">
+  <p class="section-label reveal">// 03 — Skills</p>
+  <h2 class="section-title reveal">What I<br>work with.</h2>
+  <div class="skills-grid reveal">
+    <div class="skill-item"><span class="skill-dot"></span>JavaScript / TS</div>
+    <div class="skill-item"><span class="skill-dot"></span>React & Next.js</div>
+    <div class="skill-item"><span class="skill-dot"></span>Node.js</div>
+    <div class="skill-item"><span class="skill-dot"></span>Python</div>
+    <div class="skill-item"><span class="skill-dot"></span>PostgreSQL</div>
+    <div class="skill-item"><span class="skill-dot"></span>GraphQL</div>
+    <div class="skill-item"><span class="skill-dot"></span>Figma</div>
+    <div class="skill-item"><span class="skill-dot"></span>Tailwind CSS</div>
+    <div class="skill-item"><span class="skill-dot"></span>AWS / GCP</div>
+    <div class="skill-item"><span class="skill-dot"></span>Docker</div>
+    <div class="skill-item"><span class="skill-dot"></span>Git & CI/CD</div>
+    <div class="skill-item"><span class="skill-dot"></span>Three.js / GSAP</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-wrapper reveal">
+    <p class="section-label">// 04 — Contact</p>
+    <h2 class="section-title">Let's build<br>something.</h2>
+    <a href="mailto:hello@yourname.com" class="contact-email">hello@yourname.com</a>
+    <div class="social-links">
+      <a href="#" class="social-link">↗ GitHub</a>
+      <a href="#" class="social-link">↗ LinkedIn</a>
+      <a href="#" class="social-link">↗ Twitter / X</a>
+      <a href="#" class="social-link">↗ Dribbble</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Your Name. All rights reserved.</span>
+  <span>Designed &amp; built by you.</span>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
